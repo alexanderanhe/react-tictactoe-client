@@ -13,7 +13,7 @@ export function SocketProvider({ id, children }) {
   useEffect(() => {
     const newSocket = io(
       process.env.REACT_APP_WEB_SOCKET || 'http://localhost:5000',
-      { query: { id } }
+      { query: { id }, withCredentials: true }
     )
     setSocket(newSocket)
 
