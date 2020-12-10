@@ -18,7 +18,7 @@ export default function Login({ onIdSubmit}) {
         </Form.Group>
         <Form.Group>
           <Form.Label>Enter Your Name</Form.Label>
-          <Form.Control type="text" ref={idRef} autofocus required />
+          <Form.Control type="text" ref={idRef} autoFocus required />
         </Form.Group>
         <Button type="submit">Login</Button>
       </Form>

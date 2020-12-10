@@ -263,7 +263,7 @@ export function GameProvider({ children, user }) {
         </Form.Group>
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
-          <Form.Control type="text" ref={idRef} autofocus required />
+          <Form.Control type="text" ref={idRef} autoFocus required />
           <Form.Text className="text-success">
             Listening for a host . . .
           </Form.Text>
