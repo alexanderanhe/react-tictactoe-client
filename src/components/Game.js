@@ -135,9 +135,8 @@ export default function Game() {
   })
 
   return (
-    <div style={{ paddingTop: 5, textAlign: 'center', margin: '0 auto', height: '100vh' }}>
-      <h1>Gato fractal</h1>
-      <div className="d-flex py-4">
+    <div style={{ paddingTop: 5, textAlign: 'center', margin: '0 auto' }}>
+      <div className="d-flex py-2">
         <div className="d-flex flex-column flex-grow-1">
           <h3 className={gamedata.turn % 2 ? 'text-primary' : ''}>{gamedata.players[0].name}</h3>
           <span>{ gamedata.points[0]}</span>
@@ -147,9 +146,12 @@ export default function Game() {
           <span>{ gamedata.points[1]}</span>
         </div>
       </div>
-      <div>
+      <div style={{ position: 'relative' }}>
         <canvas ref={ canvasRef }></canvas>
-        <div className="py-4">
+        <div className={'game py-2' + ([0, 1].includes(gamedata.winner) || gamedata.finished.length === 9 ? ' finished' : '')}>
+          <div className="winner text-white">
+            { [0, 1].includes(gamedata.winner) ? 'GANADOR: ' + gamedata.players[gamedata.winner].name : 'EMPATE!' }
+            </div>
           <Button className="mr-4" style={{ display: [0, 1].includes(gamedata.winner) || gamedata.finished.length === 9 ? 'inline-block' : 'none'}} 
             type="button" size="lg" onClick={newGame}>Nuevo juego</Button>
           <Button type="button" size="lg" variant="danger" onClick={exit}>Salir</Button>

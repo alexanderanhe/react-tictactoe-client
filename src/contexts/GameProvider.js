@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Container, Form, Button, Image } from 'react-bootstrap'
 import { useSocket } from '../contexts/SocketProvider'
 import useLocalStorage from '../hooks/useLocalStorage'
 import logo from '../logo.png'
+import whatsapp_logo from '../whatsapp_logo.png'
 
 const GameContext = React.createContext()
 
@@ -10,9 +11,10 @@ export function useGame() {
   return useContext(GameContext)
 }
 
-export function GameProvider({ children, user }) {
+export function GameProvider({ children, user, setUser }) {
   const idRef = useRef();
   const socket = useSocket()
+  const [errmessage, setErrmessage] = useState();
 
   const [gamedata, setGamedata] = useLocalStorage('game', {
     game: Array(9).fill(null).map(() => Array(9).fill(null)),
@@ -54,47 +56,49 @@ export function GameProvider({ children, user }) {
       || groupBroked(gamedata.pq[gamedata.pq.length-1])) && !groupBroked(current) && ![0, 1].includes(gamedata.winner);
   }
 
-  function playerTurn(game) {
-    setGamedata(prevGame => {
-      return {
-        game: game.game,
-        turn: game.turn,
-        pq: game.pq,
-        points: game.points,
-        players: game.players,
-        finished: game.finished,
-        winner: game.winner
-      }
+  function saveGame(game) {
+    if (socket == null) return
+
+    return socket.emit('game-request', game, conf => {
+      setGamedata(prevGame => {
+        return {
+          game: game.game,
+          turn: game.turn,
+          pq: game.pq,
+          points: game.points,
+          players: game.players,
+          finished: game.finished,
+          winner: game.winner
+        }
+      })
     })
   }
 
+  function playerTurn(game) {
+    return saveGame(game)
+  }
+
   function newGame() {
-    setGamedata(prevGame => {
-      const settings = {
-        game: Array(9).fill(null).map(() => Array(9).fill(null)),
-        turn: prevGame.turn,
-        pq: [],
-        points: prevGame.points,
-        players: prevGame.players,
-        finished: [],
-        winner: null
-      }
-      socket.emit('join-game', settings)
-      return settings
+     return saveGame({
+      game: Array(9).fill(null).map(() => Array(9).fill(null)),
+      turn: gamedata.turn,
+      pq: [],
+      points: gamedata.points,
+      players: gamedata.players,
+      finished: [],
+      winner: null
     })
   }
 
   function exit() {
-    setGamedata(prevGame => {
-      return {
-        game: Array(9).fill(null).map(() => Array(9).fill(null)),
-        turn: Math.floor(Math.random() * 2),
-        pq: [],
-        points: [0, 0],
-        players: [],
-        finished: [],
-        winner: null
-      }
+    return saveGame({
+      game: Array(9).fill(null).map(() => Array(9).fill(null)),
+      turn: Math.floor(Math.random() * 2),
+      pq: [],
+      points: [0, 0],
+      players: [],
+      finished: [],
+      winner: null
     })
   }
 
@@ -198,11 +202,7 @@ export function GameProvider({ children, user }) {
       console.log('messages', winner_label)
     }
 
-    
-    socket.emit('join-game', obj, conf => {
-      console.log('sended', obj)
-      playerTurn(obj)
-    })
+    playerTurn(obj)
   }
 
   const value = {
@@ -219,6 +219,15 @@ export function GameProvider({ children, user }) {
   // FORM
   function handleSubmit(e) {
     e.preventDefault()
+
+    const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+    const friendId = idRef.current.value;
+
+    if (!friendId.match(v4) || friendId === user.id) {
+      setErrmessage('Formato incorrecto')
+      return
+    }
+    setErrmessage('')
     
     const new_game = {
       game: Array(9).fill(null).map(() => Array(9).fill(null)),
@@ -227,48 +236,66 @@ export function GameProvider({ children, user }) {
       points: gamedata.points,
       players: [
         { id: user.id, name: user.name },
-        { id: idRef.current.value, name: ''},
+        { id: friendId, name: ''},
       ],
       finished: [],
       winner: null
     }
 
-    socket.emit('join-game', new_game)
-    // playerTurn(new_game)
+    playerTurn(new_game)
   }
 
   useEffect(() => {
-    if (socket == null) return
+    if (socket == null) {
+      return
+    }
 
-    socket.on('send-request-game', req => {
+    socket.on('game-response', req => {
       if (req.players[1].id === user.id) {
         req.players[1] = user;
-        socket.emit('join-game', req)
+        socket.emit('game-request', req)
       }
-      playerTurn(req)
+      setGamedata(prevGame => {
+        return req
+      })
     })
 
     return () => socket.off('send-request-game')
-  }, [socket, gamedata])
+  }, [socket, gamedata, setGamedata, user])
 
+  const status_connec = function(message) {
+    return (
+      <Form.Text className={ message ? 'text-danger' : 'text-success' }>
+        {message ? message : 'Connected: Listening for a host . . .'}
+      </Form.Text>
+    )
+  }
+
+  function handleBack(e) {
+    setUser({
+      id: user.id,
+      name: ''
+    })
+  }
 
   const connForm = (
     <Container className="align-items-center d-flex" style={{ height: '100vh'}}>
-      <Form onSubmit={handleSubmit} className="w-100">
+      <Form onSubmit={handleSubmit} className="w-100 text-center">
+        <h1 className="tictactoe">tic tac toe</h1>
         <Form.Group>
           <Image src={logo} fluid className="App-logo" style={{margin: '0 auto', display: 'block'}}/>
         </Form.Group>
         <Form.Group>
-          <Form.Label><strong>{ user.name }</strong>, share your Id: <br/><a href={'https://wa.me/?text=' + user.id} className="text-muted">{ user.id }</a></Form.Label>
+          <Form.Label><strong>{ user.name }</strong>, share your Id: <br/><span className="text-muted">{ user.id }</span></Form.Label>
+          <a href={'https://wa.me/?text=' + user.id} className="d-block"><Image src={whatsapp_logo} height="50"/></a>
         </Form.Group>
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
-          <Form.Control type="text" ref={idRef} autoFocus required />
-          <Form.Text className="text-success">
-            Listening for a host . . .
-          </Form.Text>
+          <Form.Control type="text" ref={idRef} autoFocus onClick={() => { idRef.current.select() }} required />
+          { status_connec(errmessage) }
         </Form.Group>
-        <Button type="submit">Continue</Button>
+        <Button className="float-left text-secondary" variant="outline-light" type="button" onClick={ handleBack }>Back</Button>
+        <Button className="float-right" type="submit">Continue</Button>
       </Form>
     </Container>
   )

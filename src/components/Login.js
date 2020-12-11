@@ -12,15 +12,16 @@ export default function Login({ onIdSubmit}) {
 
   return (
     <Container className="align-items-center d-flex" style={{ height: '100vh'}}>
-      <Form onSubmit={handleSubmit} className="w-100">
+      <Form onSubmit={handleSubmit} className="w-100 text-center">
+        <h1 className="tictactoe">tic tac toe</h1>
         <Form.Group>
           <Image src={logo} fluid className="App-logo" style={{margin: '0 auto', display: 'block'}}/>
         </Form.Group>
         <Form.Group>
           <Form.Label>Enter Your Name</Form.Label>
-          <Form.Control type="text" ref={idRef} autoFocus required />
+          <Form.Control type="text" ref={idRef} autoFocus onClick={() => { idRef.current.select() }} required />
         </Form.Group>
-        <Button type="submit">Login</Button>
+        <Button variant="success" type="submit">Login</Button>
       </Form>
     </Container>
   )

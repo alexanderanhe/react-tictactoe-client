@@ -27,7 +27,7 @@ function App() {
     <SocketProvider id={user.id}>
       <ContactsProvider>
         <ConversationsProvider id={user.id}>
-          <GameProvider user={user}>
+          <GameProvider user={user} setUser={setUser}>
             <Dashboard user={user}/>
           </GameProvider>
         </ConversationsProvider>
