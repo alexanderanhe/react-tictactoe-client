@@ -149,8 +149,8 @@ export default function Game() {
       </div>
       <div>
         <canvas ref={ canvasRef }></canvas>
-        <div>
-          <Button style={{ display: [0, 1].includes(gamedata.winner) || gamedata.finished.length === 9 ? 'block' : 'none'}} 
+        <div className="py-4">
+          <Button className="mr-4" style={{ display: [0, 1].includes(gamedata.winner) || gamedata.finished.length === 9 ? 'inline-block' : 'none'}} 
             type="button" size="lg" onClick={newGame}>Nuevo juego</Button>
           <Button type="button" size="lg" variant="danger" onClick={exit}>Salir</Button>
         </div>
