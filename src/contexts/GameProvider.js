@@ -287,7 +287,9 @@ export function GameProvider({ children, user, setUser }) {
         </Form.Group>
         <Form.Group>
           <Form.Label><strong>{ user.name }</strong>, share your Id: <br/><span className="text-muted">{ user.id }</span></Form.Label>
-          <a href={'https://wa.me/?text=' + user.id} className="d-block"><Image src={whatsapp_logo} height="50"/></a>
+          <div className="d-block pt-2">
+            <a href={'https://wa.me/?text=' + user.id}><Image src={whatsapp_logo} height="50"/></a>
+          </div>
         </Form.Group>
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
