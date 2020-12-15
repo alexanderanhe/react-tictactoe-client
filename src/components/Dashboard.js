@@ -8,7 +8,7 @@ export default function Dashboard({user}) {
   const { selectedConversation } = useConversations()
 
   return (
-    <div className="d-flex" style={{ height: '100vh' }}>
+    <div className="d-flex" style={{ minHeight: '100vh' }}>
       <div style={{display: 'none'}}>
         <Sidebar id={user.id}/>
         { selectedConversation && <OpenConversation /> }
