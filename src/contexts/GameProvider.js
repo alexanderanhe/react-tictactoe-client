@@ -59,19 +59,19 @@ export function GameProvider({ children, user, setUser }) {
   function saveGame(game) {
     if (socket == null) return
 
-    return socket.emit('game-request', game, conf => {
-      setGamedata(prevGame => {
-        return {
-          game: game.game,
-          turn: game.turn,
-          pq: game.pq,
-          points: game.points,
-          players: game.players,
-          finished: game.finished,
-          winner: game.winner
-        }
-      })
+    setGamedata(prevGame => {
+      return {
+        game: game.game,
+        turn: game.turn,
+        pq: game.pq,
+        points: game.points,
+        players: game.players,
+        finished: game.finished,
+        winner: game.winner
+      }
     })
+
+    return socket.emit('game-request', game)
   }
 
   function playerTurn(game) {
