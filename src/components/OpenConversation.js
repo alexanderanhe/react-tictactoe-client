@@ -40,7 +40,7 @@ export default function OpenConversation() {
 
   return (
     openchat ? (
-      <div className="d-flex" style={{ position: 'fixed', top: 0, backgroundColor: 'rgba(250, 250, 250, 0.8)', zIndex: 2, bottom: 0, right: 0, left: 0 }}>
+      <div className="d-flex" style={{ position: 'fixed', top: 0, backgroundColor: 'rgba(250, 250, 250, 0.95)', zIndex: 2, bottom: 0, right: 0, left: 0 }}>
         <div className="d-flex flex-column flex-grow-1" style={{ maxWidth: '500px', margin: '0 auto', border: '2px solid #607D8B' }}>
           <div className="flex-grow-1 overflow-auto">
             <div className="h-100 d-flex flex-column align-items-start justify-content-end px-3">
