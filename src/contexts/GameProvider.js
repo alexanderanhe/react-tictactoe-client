@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Container, Form, Button, Image } from 'react-bootstrap'
+import { Container, Form, Button, Image, ListGroup } from 'react-bootstrap'
 import { useSocket } from '../contexts/SocketProvider'
+import { useConversations } from '../contexts/ConversationsProvider'
+import { useContacts } from '../contexts/ContactsProvider'
+
 import useLocalStorage from '../hooks/useLocalStorage'
 import logo from '../logo.png'
 import whatsapp_logo from '../whatsapp_logo.png'
@@ -12,8 +15,11 @@ export function useGame() {
 }
 
 export function GameProvider({ children, user, setUser }) {
-  const idRef = useRef();
+  const idRef = useRef()
   const socket = useSocket()
+  const { contacts, createContact } = useContacts()
+  const { createConversation } = useConversations()
+
   const [errmessage, setErrmessage] = useState();
 
   const [gamedata, setGamedata] = useLocalStorage('game', {
@@ -228,6 +234,9 @@ export function GameProvider({ children, user, setUser }) {
       return
     }
     setErrmessage('')
+
+    createContact(friendId, 'Friend')
+    createConversation([friendId])
     
     const new_game = {
       game: Array(9).fill(null).map(() => Array(9).fill(null)),
@@ -253,7 +262,12 @@ export function GameProvider({ children, user, setUser }) {
     socket.on('game-response', req => {
       if (req.players[1].id === user.id) {
         req.players[1] = user;
+        createContact(req.players[0].id, req.players[0].name)
+        createConversation([req.players[0].id])
         socket.emit('game-request', req)
+      } else {
+        createContact(req.players[1].id, req.players[1].name)
+        createConversation([req.players[1].id])
       }
       setGamedata(prevGame => {
         return req
@@ -279,7 +293,7 @@ export function GameProvider({ children, user, setUser }) {
   }
 
   const connForm = (
-    <Container className="align-items-center d-flex" style={{ minHeight: '100vh'}}>
+    <Container className="align-items-center d-flex  mt-5">
       <Form onSubmit={handleSubmit} className="w-100 text-center">
         <h1 className="tictactoe">tic tac toe</h1>
         <Form.Group>
@@ -291,6 +305,20 @@ export function GameProvider({ children, user, setUser }) {
             <a href={'https://wa.me/?text=' + user.id}><Image src={whatsapp_logo} height="50"/></a>
           </div>
         </Form.Group>
+        {
+          contacts.length && (
+            <Form.Group>
+              <Form.Label>Friends</Form.Label>
+              <ListGroup horizontal>
+                { contacts.map(contact => (
+                  <ListGroup.Item key={contact.id} onClick={ () => idRef.current.value = contact.id }>
+                    { contact.name }
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </Form.Group>
+          )
+        }
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
           <Form.Control type="text" ref={idRef} autoFocus onClick={() => { idRef.current.select() }} required />

@@ -12,7 +12,19 @@ export function ContactsProvider({ children }) {
 
   function createContact(id, name) {
     setContacts(prevContacts => {
-      return [...prevContacts, { id, name }]
+      let madeChange = false
+      const contacts = prevContacts.map(contact => {
+        if (contact.id === id) {
+          madeChange = true
+          contact.name = name
+        }
+        return contact
+      })
+      if (madeChange) {
+        return contacts
+      } else {
+        return [...prevContacts, { id, name }]
+      }
     })
   }
   return (

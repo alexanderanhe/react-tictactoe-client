@@ -135,7 +135,7 @@ export default function Game() {
   })
 
   return (
-    <div style={{ paddingTop: 5, textAlign: 'center', margin: '0 auto' }}>
+    <div style={{ paddingTop: 30, textAlign: 'center', margin: '0 auto' }}>
       <div className="d-flex py-2">
         <div className="d-flex flex-column flex-grow-1">
           <h3 className={gamedata.turn % 2 ? 'text-primary' : ''}>{gamedata.players[0].name}</h3>

@@ -12,12 +12,24 @@ export function useConversations() {
 export function ConversationsProvider({ id, children }) {
   const [conversations, setConversations] = useLocalStorage('conversations', [])
   const [ selectedConversationIndex, setSelectedConversationIndex] = useState(0)
+  const [ openchat, setOpenchat] = useState(false)
   const { contacts } = useContacts()
   const socket = useSocket()
 
   function createConversation(recipients) {
     setConversations(prevConversations => {
-      return [...prevConversations, { recipients, messages: [] }]
+      let madeChange = false
+      const conversations = prevConversations.map(conversation => {
+        if (recipients[0] === conversation.recipients[0]) {
+          madeChange = true
+        }
+        return conversation
+      })
+      if (madeChange) {
+        return conversations
+      } else {
+        return [...prevConversations, { recipients, messages: [] }]
+      }
     })
   }
 
@@ -57,8 +69,6 @@ export function ConversationsProvider({ id, children }) {
 
   function sendMessage(recipients, text) {
     socket.emit('send-message', { recipients, text })
-    console.log('socketio.send-message', { recipients, text })
-
     addMessageToConversation({ recipients, text, sender: id})
   }
 
@@ -89,6 +99,8 @@ export function ConversationsProvider({ id, children }) {
     selectedConversation: formattedConversations[selectedConversationIndex],
     sendMessage,
     selectConversationIndex: setSelectedConversationIndex,
+    openchat,
+    setOpenchat,
     createConversation
   }
 

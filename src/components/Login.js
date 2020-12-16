@@ -11,7 +11,7 @@ export default function Login({ onIdSubmit}) {
   }
 
   return (
-    <Container className="align-items-center d-flex" style={{ minHeight: '100vh'}}>
+    <Container className="align-items-center d-flex mt-5">
       <Form onSubmit={handleSubmit} className="w-100 text-center">
         <h1 className="tictactoe">tic tac toe</h1>
         <Form.Group>
