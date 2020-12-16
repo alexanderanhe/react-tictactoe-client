@@ -321,7 +321,7 @@ export function GameProvider({ children, user, setUser }) {
         }
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
-          <Form.Control type="text" ref={idRef} autoFocus onClick={() => { idRef.current.select() }} required />
+          <Form.Control type="text" ref={idRef} onClick={() => { idRef.current.select() }} required />
           { status_connec(errmessage) }
         </Form.Group>
         <Button className="float-left text-secondary" variant="outline-light" type="button" onClick={ handleBack }>Back</Button>
