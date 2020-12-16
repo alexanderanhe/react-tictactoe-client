@@ -33,7 +33,7 @@ export default function OpenConversation() {
     <div style={{ position: 'fixed', right: 0 }}>
       <Button type="button" variant="primary" onClick={ e => {setOpenchat(true); !openchat && setNotification(0)} }>
         DM
-        { notification ? <span className="badge badge-light ml-2">{ notification}</span> : <></> }
+        { notification ? <span className="badge badge-light ml-2">{ notification }</span> : <></> }
       </Button>
     </div>
   )

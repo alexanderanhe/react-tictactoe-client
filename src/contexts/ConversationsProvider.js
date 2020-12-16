@@ -51,9 +51,6 @@ export function ConversationsProvider({ id, children }) {
       })
 
       if (madeChange ) {
-        if (!openchat && sender !== id) {
-          setNotification(prev => prev + 1)
-        }
         return newConversations
       } else {
         return [
@@ -73,11 +70,17 @@ export function ConversationsProvider({ id, children }) {
       })
       return conversations
     })
+    
     if (socket == null) return
 
-    socket.on('receive-message', addMessageToConversation)
+    socket.on('receive-message', ({ recipients, text, sender}) => {
+      if (!openchat && sender !== id) {
+        setNotification(prev => prev + 1)
+      }
+      addMessageToConversation({ recipients, text, sender })
+    })
     return () => socket.off('receive-message')
-  }, [socket, addMessageToConversation, notification, setNotification, contacts])
+  }, [socket, addMessageToConversation, notification, setNotification, contacts, openchat, id])
 
   function sendMessage(recipients, text) {
     socket.emit('send-message', { recipients, text })
