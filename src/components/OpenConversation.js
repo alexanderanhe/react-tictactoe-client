@@ -61,14 +61,14 @@ export default function OpenConversation() {
             </div>
           </div>
           <Form onSubmit={ handleSubmit }>
-              <Form.Group>
+              <Form.Group className="mb-1">
                 <InputGroup>
                   <Form.Control
                   as="textarea"
                   required
                   value={text}
                   onChange={e => setText(e.target.value)}
-                  style={{ height: '75px', resize:'none' }}
+                  style={{ height: '60px', resize:'none' }}
                   onKeyDown={onEnterPress}
                   autoFocus
                 />
@@ -76,7 +76,7 @@ export default function OpenConversation() {
                   <Button type="submit">Send</Button>
                 </InputGroup.Append>
                 <InputGroup.Append>
-                  <Button type="button" variant="secondary" onClick={ e => setOpenchat(false) }>&times;</Button>
+                  <Button type="button" variant="danger" onClick={ e => setOpenchat(false) }>&times;</Button>
                 </InputGroup.Append>
                 </InputGroup>
               </Form.Group>
