@@ -10,7 +10,7 @@ export default function OpenConversation() {
       node.scrollIntoView({ smooth: true })
     }
   }, [])
-  const { sendMessage, selectedConversation, openchat, setOpenchat } = useConversations()
+  const { sendMessage, selectedConversation, openchat, setOpenchat, notification, setNotification } = useConversations()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -31,7 +31,10 @@ export default function OpenConversation() {
 
   const openBtn = (
     <div style={{ position: 'fixed', right: 0 }}>
-      <Button type="button" variant="primary" onClick={ e => setOpenchat(true) }>DM</Button>
+      <Button type="button" variant="primary" onClick={ e => {setOpenchat(true); !openchat && setNotification(0)} }>
+        DM
+        { notification ? <span className="badge badge-light ml-2">{ notification}</span> : <></> }
+      </Button>
     </div>
   )
 

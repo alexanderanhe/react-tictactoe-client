@@ -12,7 +12,8 @@ export function useConversations() {
 export function ConversationsProvider({ id, children }) {
   const [conversations, setConversations] = useLocalStorage('conversations', [])
   const [ selectedConversationIndex, setSelectedConversationIndex] = useState(0)
-  const [ openchat, setOpenchat] = useState(false)
+  const [ openchat, setOpenchat] = useState(true)
+  const [ notification, setNotification] = useState(0)
   const { contacts } = useContacts()
   const socket = useSocket()
 
@@ -50,6 +51,7 @@ export function ConversationsProvider({ id, children }) {
       })
 
       if (madeChange ) {
+        if (!openchat && sender !== id) setNotification(prev => prev + 1)
         return newConversations
       } else {
         return [
@@ -65,7 +67,7 @@ export function ConversationsProvider({ id, children }) {
 
     socket.on('receive-message', addMessageToConversation)
     return () => socket.off('receive-message')
-  }, [socket, addMessageToConversation])
+  }, [socket, addMessageToConversation, notification, setNotification])
 
   function sendMessage(recipients, text) {
     socket.emit('send-message', { recipients, text })
@@ -101,6 +103,8 @@ export function ConversationsProvider({ id, children }) {
     selectConversationIndex: setSelectedConversationIndex,
     openchat,
     setOpenchat,
+    notification,
+    setNotification,
     createConversation
   }
 
