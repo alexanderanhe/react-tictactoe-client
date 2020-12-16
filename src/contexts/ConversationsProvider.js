@@ -20,15 +20,17 @@ export function ConversationsProvider({ id, children }) {
   function createConversation(recipients) {
     setConversations(prevConversations => {
       let madeChange = false
-      const conversations = prevConversations.map(conversation => {
+      const conversations = prevConversations.map((conversation, index) => {
         if (recipients[0] === conversation.recipients[0]) {
           madeChange = true
+          setSelectedConversationIndex(index)
         }
         return conversation
       })
       if (madeChange) {
         return conversations
       } else {
+        setSelectedConversationIndex(conversations.length)
         return [...prevConversations, { recipients, messages: [] }]
       }
     })
