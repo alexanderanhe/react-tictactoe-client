@@ -51,7 +51,9 @@ export function ConversationsProvider({ id, children }) {
       })
 
       if (madeChange ) {
-        if (!openchat && sender !== id) setNotification(prev => prev + 1)
+        if (!openchat && sender !== id) {
+          setNotification(prev => prev + 1)
+        }
         return newConversations
       } else {
         return [
