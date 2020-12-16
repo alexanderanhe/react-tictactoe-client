@@ -27,8 +27,20 @@ export function ContactsProvider({ children }) {
       }
     })
   }
+
+  function removeContact(id) {
+    setContacts(prevContacts => {
+      let madeChange = false
+      const contacts = prevContacts.filter(contact => {
+        return contact.id !== id
+      })
+      
+      return contacts
+    })
+  }
+
   return (
-    <ContactsContext.Provider value={{ contacts, createContact}}>
+    <ContactsContext.Provider value={{ contacts, createContact, removeContact}}>
       { children }
     </ContactsContext.Provider>
   )

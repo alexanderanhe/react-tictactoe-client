@@ -17,7 +17,7 @@ export function useGame() {
 export function GameProvider({ children, user, setUser }) {
   const idRef = useRef()
   const socket = useSocket()
-  const { contacts, createContact } = useContacts()
+  const { contacts, createContact, removeContact } = useContacts()
   const { createConversation } = useConversations()
 
   const [errmessage, setErrmessage] = useState();
@@ -309,10 +309,11 @@ export function GameProvider({ children, user, setUser }) {
           contacts.length ? (
             <Form.Group>
               <Form.Label>Friends</Form.Label>
-              <ListGroup horizontal>
+              <ListGroup horizontal style={{ overflowX: 'auto' }}>
                 { contacts.map(contact => (
-                  <ListGroup.Item key={contact.id} onClick={ () => idRef.current.value = contact.id }>
-                    { contact.name }
+                  <ListGroup.Item key={contact.id}>
+                    <span onClick={ () => idRef.current.value = contact.id }>{ contact.name }</span>
+                    <span style={{ position: 'absolute', top: 0, right: '3px'}} onClick={ () => removeContact(contact.id) }>&times;</span>
                   </ListGroup.Item>
                 ))}
               </ListGroup>
