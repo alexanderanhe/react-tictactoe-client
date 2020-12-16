@@ -63,11 +63,19 @@ export function ConversationsProvider({ id, children }) {
   }, [setConversations])
 
   useEffect(() => {
+    setConversations(prevConversations => {
+      const conversations = prevConversations.filter(conversation => {
+        return contacts.some(contact => {
+          return conversation.recipients.includes(contact.id)
+        })
+      })
+      return conversations
+    })
     if (socket == null) return
 
     socket.on('receive-message', addMessageToConversation)
     return () => socket.off('receive-message')
-  }, [socket, addMessageToConversation, notification, setNotification])
+  }, [socket, addMessageToConversation, notification, setNotification, contacts])
 
   function sendMessage(recipients, text) {
     socket.emit('send-message', { recipients, text })
@@ -98,7 +106,6 @@ export function ConversationsProvider({ id, children }) {
 
   const value = {
     conversations: formattedConversations,
-    setConversations,
     selectedConversation: formattedConversations[selectedConversationIndex],
     sendMessage,
     selectConversationIndex: setSelectedConversationIndex,

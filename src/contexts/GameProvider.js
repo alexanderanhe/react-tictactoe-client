@@ -312,8 +312,8 @@ export function GameProvider({ children, user, setUser }) {
               <ListGroup horizontal style={{ overflowX: 'auto' }}>
                 { contacts.map(contact => (
                   <ListGroup.Item key={contact.id}>
-                    <span onClick={ () => idRef.current.value = contact.id }>{ contact.name }</span>
-                    <span style={{ position: 'absolute', top: 0, right: '3px'}} onClick={ () => removeContact(contact.id) }>&times;</span>
+                    <span onClick={ () => idRef.current.value = contact.id } style={{ cursor: 'pointer' }}>{ contact.name }</span>
+                    <span style={{ position: 'absolute', top: 0, right: '3px', cursor: 'pointer'}} onClick={ () => removeContact(contact.id) }>&times;</span>
                   </ListGroup.Item>
                 ))}
               </ListGroup>
