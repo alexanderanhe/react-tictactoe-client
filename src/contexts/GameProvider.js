@@ -306,7 +306,7 @@ export function GameProvider({ children, user, setUser }) {
           </div>
         </Form.Group>
         {
-          contacts.length && (
+          contacts.length ? (
             <Form.Group>
               <Form.Label>Friends</Form.Label>
               <ListGroup horizontal>
@@ -317,7 +317,7 @@ export function GameProvider({ children, user, setUser }) {
                 ))}
               </ListGroup>
             </Form.Group>
-          )
+          ) : null
         }
         <Form.Group>
           <Form.Label>or enter Your Friend`s Id</Form.Label>
