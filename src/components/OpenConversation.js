@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { Form, InputGroup, Button } from 'react-bootstrap'
+import { ChatFill } from 'react-bootstrap-icons';
 import { useConversations } from '../contexts/ConversationsProvider'
 
 export default function OpenConversation() {
@@ -31,9 +32,9 @@ export default function OpenConversation() {
 
   const openBtn = (
     <div style={{ position: 'fixed', right: 0 }}>
-      <Button type="button" variant="primary" onClick={ e => {setOpenchat(true); !openchat && setNotification(0)} }>
-        DM
-        { notification ? <span className="badge badge-light ml-2">{ notification }</span> : <></> }
+      <Button type="button" variant={notification ? "outline-primary" : "outline-secondary"} onClick={ e => {setOpenchat(true); !openchat && setNotification(0)} }>
+        <ChatFill />
+        { notification ? <span className="badge badge-primary ml-2">{ notification }</span> : <></> }
       </Button>
     </div>
   )

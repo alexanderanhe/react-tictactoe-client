@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap'
 
 export default function Game() {
 
-  const { gamedata, newGame, exit, checkWinner, groupBroked, quadrantGroup, opAvailable, activeTurn } = useGame()
+  const { gamedata, newGame, exit, checkWinner, groupBroked, quadrantGroup, opAvailable, activeTurn, runShift } = useGame()
 
   const canvasRef = useRef(null)
   const wscreen = Math.max(window.screen.width, window.innerWidth) - 5;
@@ -122,17 +122,16 @@ export default function Game() {
       var gridX = Math.floor(mouseX / xl);
       var gridY = Math.floor(mouseY / yl);
       
-      checkWinner(gamedata, gridX, gridY);
-      drawGrid(ctx, gamedata);
+      runShift(gridX, gridY)
     }
 
     drawGrid(ctx, gamedata)
 
     canvas.addEventListener('mousedown', mouseClick)
     return () => {
-      window.removeEventListener("mousedown", mouseClick)
+      canvas.removeEventListener("mousedown", mouseClick)
     }
-  })
+  }, [gamedata])
 
   return (
     <div style={{ paddingTop: 30, textAlign: 'center', margin: '0 auto' }}>

@@ -63,8 +63,6 @@ export function GameProvider({ children, user, setUser }) {
   }
 
   function saveGame(game) {
-    if (socket == null) return
-
     setGamedata(prevGame => {
       return {
         game: game.game,
@@ -76,24 +74,29 @@ export function GameProvider({ children, user, setUser }) {
         winner: game.winner
       }
     })
-
-    return socket.emit('game-request', game)
   }
 
-  function playerTurn(game) {
-    return saveGame(game)
+  function runShift(gridX, gridY) {
+    if (!activeTurn(gamedata) || !(opAvailable(gridX, gridY) && ![0, 1].includes(gamedata.game[gridX][gridY]))) {
+      return
+    }
+    if (socket == null) {
+      return
+    }
+    console.log(gridX, gridY);
+    const oponent = gamedata.turn % 2 ? 1 : 0;
+    const receiver = gamedata.players[oponent].id
+
+    socket.emit('game-runshift', { gridX, gridY, turn: gamedata.turn, receiver })
   }
 
   function newGame() {
-     return saveGame({
-      game: Array(9).fill(null).map(() => Array(9).fill(null)),
-      turn: gamedata.turn,
-      pq: [],
-      points: gamedata.points,
-      players: gamedata.players,
-      finished: [],
-      winner: null
-    })
+    const name = user.name
+    const receiver = gamedata.players.find(player => {
+      return player.id !== user.id
+    }).id
+    console.log('socket.emit', 'game-requests', { name, turn: gamedata.turn, receiver });
+    socket.emit('game-requests', { name, turn: gamedata.turn, receiver })
   }
 
   function exit() {
@@ -114,10 +117,6 @@ export function GameProvider({ children, user, setUser }) {
   }
   function checkWinner(obj, gridX, gridY) {
     const arr = obj.game;
-
-    if (!activeTurn(obj) || !(opAvailable(gridX, gridY) && ![0, 1].includes(arr[gridX][gridY]))) {
-      return
-    }
     const quadrant = (x, y) => {
       const a = [
         [ [0, 3, 6], [0, 3, 6] ],
@@ -208,7 +207,7 @@ export function GameProvider({ children, user, setUser }) {
       console.log('messages', winner_label)
     }
 
-    playerTurn(obj)
+    saveGame(obj)
   }
 
   const value = {
@@ -219,7 +218,8 @@ export function GameProvider({ children, user, setUser }) {
     groupBroked,
     quadrantGroup,
     opAvailable,
-    activeTurn
+    activeTurn,
+    runShift
   }
 
   // FORM
@@ -235,23 +235,14 @@ export function GameProvider({ children, user, setUser }) {
     }
     setErrmessage('')
 
-    createContact(friendId, 'Friend')
-    createConversation([friendId])
-    
-    const new_game = {
-      game: Array(9).fill(null).map(() => Array(9).fill(null)),
-      turn: gamedata.turn,
-      pq: [],
-      points: gamedata.points,
-      players: [
-        { id: user.id, name: user.name },
-        { id: friendId, name: ''},
-      ],
-      finished: [],
-      winner: null
+    if (socket == null) {
+      return
     }
+    const name = user.name
+    const receiver = friendId
+    console.log('socket.emit', 'game-requests', { name, turn: gamedata.turn, receiver });
+    socket.emit('game-requests', { name, turn: gamedata.turn, receiver })
 
-    playerTurn(new_game)
   }
 
   useEffect(() => {
@@ -259,22 +250,83 @@ export function GameProvider({ children, user, setUser }) {
       return
     }
 
-    socket.on('game-response', req => {
-      if (req.players[1].id === user.id) {
-        req.players[1] = user;
-        createContact(req.players[0].id, req.players[0].name)
-        createConversation([req.players[0].id])
-        socket.emit('game-request', req)
-      } else {
-        createContact(req.players[1].id, req.players[1].name)
-        createConversation([req.players[1].id])
-      }
-      setGamedata(prevGame => {
-        return req
+    socket.on('game-requests', ({name, turn, sender}) => {
+      console.log('socket.on', 'game-requests', {name, turn, sender})
+      createContact(sender, name)
+      createConversation([sender])
+
+      const same_person = gamedata.players.some(player => {
+        return sender === player.id
       })
+      const response = !gamedata.players.length || same_person ? 'accept' : 'decline'
+
+      if (response === 'accept') {
+        const players = gamedata.players.length ? gamedata.players : [
+          { id: sender, name },
+          { id: user.id, name: user.name },
+        ]
+        const new_game = {
+          game: Array(9).fill(null).map(() => Array(9).fill(null)),
+          turn,
+          pq: [],
+          points: gamedata.points,
+          players,
+          finished: [],
+          winner: null
+        }
+  
+        saveGame(new_game)
+      }
+
+      socket.emit('game-responses', { name: user.name, turn, response, receiver: sender })
     })
 
-    return () => socket.off('send-request-game')
+    socket.on('game-responses', ({ name, turn, response, sender }) => {
+      console.log('socket.on', 'game-responses', { name, response, sender })
+      createContact(sender, name)
+      createConversation([sender])
+
+      if (response === 'accept') {
+        console.log('Game Accepted')
+
+        const players = gamedata.players.length ? gamedata.players : [
+          { id: user.id, name: user.name },
+          { id: sender, name },
+        ]
+        const new_game = {
+          game: Array(9).fill(null).map(() => Array(9).fill(null)),
+          turn,
+          pq: [],
+          points: gamedata.points,
+          players,
+          finished: [],
+          winner: null
+        }
+
+        saveGame(new_game)
+      } else {
+        setErrmessage('Your friend is currently in a game')
+      }
+    })
+
+    socket.on('game-runshift', ({ gridX, gridY, turn, sender  }) => {
+      console.log('socket.on', 'game-runshift', { gridX, gridY, turn, sender  })
+      socket.emit('game-runshift-response', { gridX, gridY, turn, receiver: sender })
+      checkWinner(gamedata, gridX, gridY)
+    })
+
+    socket.on('game-runshift-response', ({ gridX, gridY, turn, sender }) => {
+      console.log('socket.on', 'game-runshift-response', { gridX, gridY, turn, sender })
+      checkWinner(gamedata, gridX, gridY)
+    })
+
+    return () => {
+      socket.off('game-requests')
+      socket.off('game-responses')
+      socket.off('game-runshift')
+      socket.off('game-runshift-response')
+    }
+
   }, [socket, gamedata, setGamedata, user])
 
   const status_connec = function(message) {
